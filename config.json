@@ -11,7 +11,7 @@
     },
     "env_production" : {
        "NODE_ENV": "production",
-       "PORT": 80,
+       "PORT": 8080,
        "DATABASE": "mongodb://user:user@ds023105.mlab.com:23105/projectt"
     }
   }]
