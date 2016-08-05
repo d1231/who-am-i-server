@@ -1,0 +1,18 @@
+{
+  "apps" : [{
+    // Application #1
+    "name"        : "worker-app",
+    "script"      : "app/bin/www",
+    "watch": true,
+    "env": {
+      "NODE_ENV": "development",
+      "PORT": 3000,
+      "DATABASE": "mongodb://localhost/projectt"
+    },
+    "env_production" : {
+       "NODE_ENV": "production",
+       "PORT": 80,
+       "DATABASE": "mongodb://user:user@ds023105.mlab.com:23105/projectt"
+    }
+  }]
+}

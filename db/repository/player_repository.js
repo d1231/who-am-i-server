@@ -3,13 +3,9 @@
 var Player = require("../models/player");
 var PlayerRank = require("../models/player_rank");
 
-var mongoose = require('mongoose');
-
 function randomSample(sampleSize, level) {
 
 	level = level || 0;
-
-	console.log('HHH"');
 
 	return PlayerRank.aggregate(
 		{$match: {rank: {$gte: 10000 - 1000 * level}}},

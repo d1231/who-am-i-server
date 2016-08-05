@@ -10,7 +10,7 @@ app.set('port', port);
 var server;
 
 require('../../db/db')
-	.init("mongodb://localhost/projectt")
+	.init(process.env.DATABASE || "mongodb://localhost/projectt")
 	.then(function () {
 
 		server = http.createServer(app);
