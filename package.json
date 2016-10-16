@@ -24,6 +24,7 @@
     "nodemw": "~0.10.1",
     "rx": "^4.1.0",
     "serve-favicon": "~2.3.0",
+    "validator": "^5.5.0",
     "wtf_wikipedia": "^0.3.31"
   }
 }
