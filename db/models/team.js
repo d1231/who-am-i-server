@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
 
-var playerSchema = new Schema({
+var teamSchema = new Schema({
 
 	id: {
 		type: String,
@@ -17,10 +17,17 @@ var playerSchema = new Schema({
 		required: true
 	},
 
-	basicRank: {
-		type: Number,
+	names: [{
+		type: String,
+		index: true,
+		text: true
+	}],
+
+	nation: {
+		type: String,
+		index: true,
 		required: true
 	}
 });
 
-module.exports = mongoose.model("team", playerSchema);
+module.exports = mongoose.model("team", teamSchema);

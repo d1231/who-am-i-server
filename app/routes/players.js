@@ -14,8 +14,6 @@ router.get('/random_sample', function (req, res, next) {
 
 	let size = Number(req.query.size) || DEFAULT_SAMPLE;
 
-	validate.
-
 	player_repo.randomSample(size).then(function (randomPlayer) {
 		res.json(randomPlayer);
 	}).catch(function (err) {

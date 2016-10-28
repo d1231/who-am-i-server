@@ -2,98 +2,110 @@
 
 var fsp = require('fs-promise');
 
+var winston = require('winston');
 
 const VISITED_LIST = 'visited.list';
 
 class Crawler {
 
-    constructor(fetcher, visitor) {
-        this.pageFetcher = fetcher;
-        this.visitor = visitor;
-        this.pageQueue = [];
-        this.visited = new Set();
-    }
+	constructor(fetcher, visitor, errorHandler) {
+		this.pageFetcher = fetcher;
+		this.visitor = visitor;
+		this.errorHandler = errorHandler;
+		this.pageQueue = [];
+		this.visited = new Set();
+	}
 
-    startCrawling() {
+	startCrawling() {
 
-        var crawler = this;
+		var crawler = this;
 
-        return fsp.readFile(VISITED_LIST)
-                  .then(function (data) {
+		return fsp.readFile(VISITED_LIST)
+				  .then(function (data) {
 
-                      crawler.visited = new Set(JSON.parse(data));
+					  crawler.visited = new Set(JSON.parse(data));
 
-                      return new Promise(function (resolve, reject) {
+					  return new Promise(function (resolve, reject) {
 
-                          function crawlingWrapper(resolve, reject) {
+						  function crawlingWrapper(resolve, reject) {
 
-                              if (crawler.pageQueue.length == 0) {
-                                  return resolve();
-                              }
-
-
-                              const page = crawler.pageQueue.pop();
-
-                              if (crawler.visited.has(page)) {
-                                  console.log("Skipping: " + page);
-                                  crawlingWrapper(resolve);
-                                  return;
-                              }
-
-                              console.log(page);
-
-                              crawler.pageFetcher.fetch(page)
-                                     .then(function (res) {
-
-                                         return crawler.visitor.visit(crawler, {
-                                             data: res,
-                                             id: page
-                                         });
-
-                                     })
-                                     .then(function () {
+							  if (crawler.pageQueue.length == 0) {
+								  return resolve();
+							  }
 
 
-                                         crawlingWrapper(resolve);
+							  const page = crawler.pageQueue.pop();
 
-                                     })
-                                     .catch(function (err) {
+							  if (crawler.visited.has(page)) {
+								  winston.info("Skipping: " + page);
+								  crawlingWrapper(resolve);
+								  return;
+							  }
 
-                                         console.error(err);
-                                         console.error("Error page: " + page);
+							  winston.info(page);
 
-                                         crawlingWrapper(resolve);
+							  crawler.pageFetcher.fetch(page)
+									 .then(function (res) {
 
-                                     });
+										 return crawler.visitor.visit(crawler, {
+											 data: res,
+											 id: page
+										 });
 
-                          }
+									 })
+									 .then(function () {
 
-                          crawlingWrapper(resolve, reject);
 
-                      });
+										 crawlingWrapper(resolve);
 
-                  });
-    }
+									 })
+									 .catch(function (err) {
 
-    addPage(page) {
+										 winston.error(err);
+										 winston.error("Error page: " + page);
 
-        this.pageQueue.push(page);
+										 if (crawler.errorHandler) {
+											 crawler.errorHandler.pageFault(page, err);
+										 }
 
-    }
 
-    addPages(pages) {
+										 crawlingWrapper(resolve);
 
-        this.pageQueue = this.pageQueue.concat(pages);
+									 });
 
-    }
+						  }
 
-    clean() {
+						  crawlingWrapper(resolve, reject);
 
-        let visitedArr = Array.from(this.visited);
-        let data = JSON.stringify(visitedArr);
-        fsp.writeFile(VISITED_LIST, data);
+					  });
 
-    }
+				  });
+	}
+
+	addPage(page) {
+
+		this.pageQueue.push(page);
+
+	}
+
+	addPages(pages) {
+
+		this.pageQueue = this.pageQueue.concat(pages);
+
+	}
+
+	clean() {
+
+		let visitedArr = Array.from(this.visited);
+		let data = JSON.stringify(visitedArr);
+		fsp.writeFile(VISITED_LIST, data);
+
+		const errorHandler = this.errorHandler;
+		if (errorHandler) {
+			errorHandler.onEnd();
+		}
+
+	}
 
 }
 

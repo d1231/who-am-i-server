@@ -21,7 +21,6 @@ function randomSample(sampleSize, level) {
 
 						 });
 
-
 						 return Player.find()
 									  .where("id").in(ids)
 									  .select("-__v")
@@ -39,7 +38,10 @@ function savePlayer(player) {
 
 		let teamModel = {};
 
-		teamModel.team = team.info.page;
+		teamModel.team = {
+			identifier: team.info.page,
+			text: team.info.src || team.info.page
+		};
 		teamModel.start = team.years.start;
 		teamModel.end = team.years.end;
 		teamModel.loan = team.loan;
@@ -52,8 +54,13 @@ function savePlayer(player) {
 
 	});
 
+	if (teams.length === 0) {
+
+		throw new Error("Empty teams");
+	}
+
 	return new Player({
-		id: player.id,
+		wikiId: player.id,
 		name: player.name,
 		fullname: player.fullname,
 		position: player.position,

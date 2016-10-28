@@ -1,0 +1,1 @@
+{"message":"Cannot read property 'onEnd' of undefined","stack":"TypeError: Cannot read property 'onEnd' of undefined\n    at Crawler.clean (/home/danny/projects/projectt/server/wiki_extractor/main/crawler.js:102:20)\n    at /home/danny/projects/projectt/server/wiki_extractor/main/runners/team_run.js:65:13","level":"error","timestamp":"2016-10-23T08:41:55.056Z"}

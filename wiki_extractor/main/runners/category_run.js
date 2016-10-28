@@ -6,7 +6,7 @@ const argsOptions = [
 ];
 
 var commandLineArgs = require('command-line-args')(argsOptions);
-
+var winston = require('winston');
 var bot = require('nodemw');
 var fs = require('fs');
 
@@ -18,12 +18,12 @@ var client = new bot({
 
 commandLineArgs.category.forEach(function (category) {
 
-	console.log(category);
+	winston.info(category);
 
 	client.getPagesInCategory(category, function (err, pages) {
 
 		if (err) {
-			console.error(err);
+			winston.error(err);
 			return;
 		}
 
@@ -36,17 +36,17 @@ commandLineArgs.category.forEach(function (category) {
 
 							});
 
-		let output = commandLineArgs.output_dir + category.replace(" ", "_").toLowerCase() + ".json";
-		console.log(output);
+		let output = commandLineArgs.output_dir + category.replaceAll(" ", "_").toLowerCase() + ".json";
+		winston.info(output);
 		let data = JSON.stringify(pagesArr);
 		fs.writeFile(output, data, {flag: 'w+'}, err => {
 
 			if (err) {
-				console.error(err);
+				winston.error(err);
 				return;
 			}
 
-			console.log("Successfully wrote " + category);
+			winston.info("Successfully wrote " + category);
 
 		});
 	});

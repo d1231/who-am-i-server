@@ -1,55 +1,78 @@
 "use strict";
 
-let db = require('../../../db/db');
-var Crawler = require('./../crawler');
-var fetcher = require('./../fetcher');
-var visitor = require('./../visitors/player-visitor');
-var ON_DEATH = require('death');
+const db = require('../../../db/db');
+const Crawler = require('./../crawler');
+const fetcher = require('./../fetcher');
+const winston = require('winston');
+const visitor = require('./../visitors/player-visitor');
+const playerErrorHandler = require("../error_handlers/player_error_handler");
+const commandLineArgs = require('command-line-args');
+const fs = require('fs');
 
-var crawler = new Crawler(fetcher, visitor);
+initWinston();
 
-//let arr = require('./pages/english_players');
-//
-//let pages = arr.map(function (page) {
-//    return page.title;
-//});
+let cmdArgs = initCommandLineArgs();
 
-let pages = ["Gianfranco Zola"];
+let crawler = initCrawler();
 
-console.log(pages);
-
-
-crawler.addPages(pages);
-
-db.init("mongodb://localhost/projectt").then(function () {
-
-      console.log("Successfully connected");
-
-      return crawler.startCrawling();
-  })
-  .then(function () {
-
-      console.log("Finished");
-      db.disconnect();
-      crawler.clean();
-
-  })
-  .catch(function (err) {
-
-      console.error(err);
-      db.disconnect();
-      crawler.clean();
-
-  });
-
-ON_DEATH(function (signal, err) {
-
-    crawler.clean();
-
-});
-
-//});
+runCrawler();
 
 
-//crawler.addPage("Robinho");
-//
+function initWinston() {
+	winston.add(winston.transports.File, {
+		level: "error",
+		filename: "log.err"
+	});
+}
+
+
+function initCommandLineArgs() {
+	const argsOptions = [
+		{name: "pages", alias: "p", multiple: true, type: String, defaultValue: []},
+		{name: "fpp", "alias": "f", multiple: false, type: String, defaultValue: "faultedPages.log"}
+	];
+
+	return commandLineArgs(argsOptions);
+}
+
+function initCrawler() {
+
+	let errorHandler = playerErrorHandler(cmdArgs.fpp);
+
+	let crawler = new Crawler(fetcher, visitor, errorHandler);
+
+	cmdArgs.pages.forEach(function (pagesPath) {
+
+
+		let pages = JSON.parse(fs.readFileSync(pagesPath));
+
+		crawler.addPages(pages);
+
+
+	});
+	return crawler;
+}
+
+
+function runCrawler() {
+	db.init("mongodb://localhost/projectt-v2").then(function () {
+
+		  winston.info("Successfully connected");
+
+		  return crawler.startCrawling();
+	  })
+	  .then(function () {
+
+		  winston.info("Finished");
+		  db.disconnect();
+		  crawler.clean();
+
+	  })
+	  .catch(function (err) {
+
+		  winston.error(err);
+		  db.disconnect();
+		  crawler.clean();
+
+	  });
+}

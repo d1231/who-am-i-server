@@ -19,12 +19,13 @@
     "jade": "~1.11.0",
     "jsonfile": "^2.3.1",
     "mocha": "^2.5.3",
-    "mongoose": "~4.5.2",
+    "mongoose": "~4.6.4",
     "morgan": "~1.6.1",
     "nodemw": "~0.10.1",
     "rx": "^4.1.0",
     "serve-favicon": "~2.3.0",
     "validator": "^5.5.0",
-    "wtf_wikipedia": "^0.3.31"
+    "winston": "^2.2.0",
+    "wtf_wikipedia": "^0.5.0"
   }
 }
