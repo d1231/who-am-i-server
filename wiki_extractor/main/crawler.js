@@ -8,10 +8,12 @@ const VISITED_LIST = 'visited.list';
 
 class Crawler {
 
-	constructor(fetcher, visitor, errorHandler) {
+	constructor(fetcher, visitor, options) {
 		this.pageFetcher = fetcher;
 		this.visitor = visitor;
-		this.errorHandler = errorHandler;
+		options = options || {};
+		this.errorHandler = options.errorHandler;
+		this.skipDuplicates = options.skipDuplicates;
 		this.pageQueue = [];
 		this.visited = new Set();
 	}
@@ -21,76 +23,91 @@ class Crawler {
 		var crawler = this;
 
 		return fsp.readFile(VISITED_LIST)
-				  .then(function (data) {
+			.then(function (data) {
 
-					  crawler.visited = new Set(JSON.parse(data));
+				return new Promise(function (resolve, reject) {
 
-					  return new Promise(function (resolve, reject) {
+					function crawlingWrapper(resolve, reject) {
 
-						  function crawlingWrapper(resolve, reject) {
-
-							  if (crawler.pageQueue.length == 0) {
-								  return resolve();
-							  }
+						if (crawler.pageQueue.length == 0) {
+							return resolve();
+						}
 
 
-							  const page = crawler.pageQueue.pop();
+						const pageStruct = crawler.pageQueue.pop();
 
-							  if (crawler.visited.has(page)) {
-								  winston.info("Skipping: " + page);
-								  crawlingWrapper(resolve);
-								  return;
-							  }
+						const page = pageStruct.page;
 
-							  winston.info(page);
+						const duplicate = crawler.visited.has(page);
 
-							  crawler.pageFetcher.fetch(page)
-									 .then(function (res) {
+						pageStruct.data.duplicate = duplicate;
 
-										 return crawler.visitor.visit(crawler, {
-											 data: res,
-											 id: page
-										 });
+						if (duplicate && crawler.skipDuplicates) {;
+							winston.info("Skipping: " + page);
+							crawlingWrapper(resolve);
+							return;
+						}
 
-									 })
-									 .then(function () {
+						winston.info(page);
+
+						crawler.pageFetcher.fetch(page)
+							.then(function (res) {
+
+								return crawler.visitor.visit(crawler, {
+									data: res,
+									metadata: pageStruct.data,
+									id: page
+								});
+
+							})
+							.then(function () {
+
+								crawler.visited.add(page);
+								crawlingWrapper(resolve);
+
+							})
+							.catch(function (err) {
+
+								winston.error(err);
+								winston.error("Error page: " + page);
+
+								if (crawler.errorHandler) {
+									crawler.errorHandler.pageFault(page, err);
+								}
 
 
-										 crawlingWrapper(resolve);
+								crawlingWrapper(resolve);
 
-									 })
-									 .catch(function (err) {
+							});
 
-										 winston.error(err);
-										 winston.error("Error page: " + page);
+					}
 
-										 if (crawler.errorHandler) {
-											 crawler.errorHandler.pageFault(page, err);
-										 }
+					crawlingWrapper(resolve, reject);
 
+				});
 
-										 crawlingWrapper(resolve);
-
-									 });
-
-						  }
-
-						  crawlingWrapper(resolve, reject);
-
-					  });
-
-				  });
+			});
 	}
 
-	addPage(page) {
+	addPage(page, data) {
 
-		this.pageQueue.push(page);
+		data = data || {};
+
+		this.pageQueue.push({
+			page: page,
+			data: data
+		});
 
 	}
 
 	addPages(pages) {
 
-		this.pageQueue = this.pageQueue.concat(pages);
+		this.pageQueue = this.pageQueue.concat(pages.map(function (page) {
+			return {
+				page: page,
+				data: {}
+			}
+		}));
 
 	}
 

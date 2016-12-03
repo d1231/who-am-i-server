@@ -7,11 +7,11 @@ var PlayerRepo = require('../../../db/repository/player_repository');
 function getKeysStartingWith(object, searchString) {
 
 	return Object.keys(object)
-				 .filter(function (value) {
+		.filter(function (value) {
 
-					 return value.startsWith(searchString);
+			return value.startsWith(searchString);
 
-				 });
+		});
 }
 
 function parseDates(years) {
@@ -41,11 +41,12 @@ function parseDates(years) {
 		end = start;
 	}
 
-	//start = Number.isNaN(start) ? 0 : start;
-	//end = Number.isNaN(end) ? 0 : end;
-
-	return {start: start, end: end};
+	return {
+		start: start,
+		end: end
+	};
 }
+
 function getPlayerBirthplace(wikiPage) {
 
 	if (wikiPage.infobox.birth_place) {
@@ -64,6 +65,7 @@ function getPlayerBirthplace(wikiPage) {
 		return "UNKNOWN";
 	}
 }
+
 function safeNumber(val) {
 
 	if (!Number.isNaN(Number(val))) {
@@ -73,6 +75,7 @@ function safeNumber(val) {
 	}
 
 }
+
 function getPlayerBirthDate(wikiPage) {
 
 	if (wikiPage.infobox.birth_date) {
@@ -153,6 +156,7 @@ function parseTeams2(wikiPage, player) {
 	});
 
 }
+
 function parseTeams(wikiPage, player) {
 
 	player.teams = [];
@@ -187,7 +191,8 @@ function parseTeams(wikiPage, player) {
 				parsedYears = parseDates(years);
 			} else {
 				parsedYears = {
-					start: 0, end: 0
+					start: 0,
+					end: 0
 				};
 			}
 
@@ -219,51 +224,53 @@ function parseNationalTeams(wikiPage, player) {
 	player.nationalTeams = [];
 
 	Object.keys(wikiPage.infobox)
-		  .filter(function (value) {
+		.filter(function (value) {
 
-			  return value.startsWith("nationalteam");
+			return value.startsWith("nationalteam");
 
-		  })
-		  .forEach(function (key) {
+		})
+		.forEach(function (key) {
 
-			  let nationalTeamNum = key.substring(12);
+			let nationalTeamNum = key.substring(12);
 
-			  let nationalTeamInfo = wikiPage.infobox[key];
+			let nationalTeamInfo = wikiPage.infobox[key];
 
-			  if (!nationalTeamInfo.links || !nationalTeamInfo.text) {
-				  return;
-			  }
+			if (!nationalTeamInfo.links || !nationalTeamInfo.text) {
+				return;
+			}
 
-			  let team = nationalTeamInfo.links;
+			let team = nationalTeamInfo.links;
 
-			  let parsedYears;
-			  if (wikiPage.infobox["nationalyears" + nationalTeamNum]) {
-				  let years = wikiPage.infobox["nationalyears" + nationalTeamNum].text;
-				  parsedYears = parseDates(years);
-			  } else {
-				  parsedYears = {
-					  start: 0, end: 0
-				  };
-			  }
+			let parsedYears;
+			if (wikiPage.infobox["nationalyears" + nationalTeamNum]) {
+				let years = wikiPage.infobox["nationalyears" + nationalTeamNum].text;
+				parsedYears = parseDates(years);
+			} else {
+				parsedYears = {
+					start: 0,
+					end: 0
+				};
+			}
 
 
-			  let caps = wikiPage.infobox["nationalcaps" + nationalTeamNum] ? wikiPage.infobox["nationalcaps" + nationalTeamNum].text : "";
-			  let goals = wikiPage.infobox["nationalgoals" + nationalTeamNum] ? wikiPage.infobox["nationalgoals" + nationalTeamNum].text : "";
+			let caps = wikiPage.infobox["nationalcaps" + nationalTeamNum] ? wikiPage.infobox["nationalcaps" + nationalTeamNum].text : "";
+			let goals = wikiPage.infobox["nationalgoals" + nationalTeamNum] ? wikiPage.infobox["nationalgoals" + nationalTeamNum].text : "";
 
-			  player.nationalTeams.push({
-				  "info": team[0],
-				  "years": {
-					  start: parsedYears.start,
-					  end: parsedYears.end
-				  },
-				  "stats": {
-					  "goals": goals,
-					  "apps": caps
-				  }
-			  });
+			player.nationalTeams.push({
+				"info": team[0],
+				"years": {
+					start: parsedYears.start,
+					end: parsedYears.end
+				},
+				"stats": {
+					"goals": goals,
+					"apps": caps
+				}
+			});
 
-		  });
+		});
 }
+
 function visit(crawler, page) {
 
 	let wikiPage = wikiParser.parse(page.data);

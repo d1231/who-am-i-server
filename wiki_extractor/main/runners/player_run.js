@@ -5,7 +5,7 @@ const Crawler = require('./../crawler');
 const fetcher = require('./../fetcher');
 const winston = require('winston');
 const visitor = require('./../visitors/player-visitor');
-const playerErrorHandler = require("../error_handlers/player_error_handler");
+const playerErrorHandler = require("../error_handlers/page_error_handler");
 const commandLineArgs = require('command-line-args');
 const fs = require('fs');
 
@@ -39,7 +39,9 @@ function initCrawler() {
 
 	let errorHandler = playerErrorHandler(cmdArgs.fpp);
 
-	let crawler = new Crawler(fetcher, visitor, errorHandler);
+	let crawler = new Crawler(fetcher, visitor, {
+		errorHandler: errorHandler
+	});
 
 	cmdArgs.pages.forEach(function (pagesPath) {
 

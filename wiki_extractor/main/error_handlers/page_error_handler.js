@@ -3,7 +3,7 @@
 var fs = require("fs");
 var winston = require("winston");
 
-class PlayerErrorHandler {
+class PageErrorHandler {
 
 
 	constructor(errorFilePath) {
@@ -41,5 +41,5 @@ class PlayerErrorHandler {
 }
 
 module.exports = function (path) {
-	return new PlayerErrorHandler(path);
+	return new PageErrorHandler(path);
 };

@@ -49,6 +49,10 @@ var playerSchema = new Schema({
 				type: String,
 				index: true,
 				required: true
+			},
+			id: {
+				type: String,
+				index: true
 			}
 		},
 
@@ -86,7 +90,14 @@ var playerSchema = new Schema({
 		type: Number,
 		index: true,
 		required: true
-	}
+	},
+
+	nations: [
+		{
+			type: String,
+			index: true
+		}
+	]
 
 });
 

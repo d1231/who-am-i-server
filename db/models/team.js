@@ -23,6 +23,10 @@ var teamSchema = new Schema({
 		text: true
 	}],
 
+	ground: {
+		type: String
+	},
+	
 	nation: {
 		type: String,
 		index: true,
