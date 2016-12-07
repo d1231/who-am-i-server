@@ -1,5 +1,11 @@
 "use strict";
 
+/**
+ * 
+ * Script for updating for each player it's active years
+ * 
+ */
+
 const winston = require('winston');
 const db = require('../../../db/db');
 const Player = require('../../../db/models/player');

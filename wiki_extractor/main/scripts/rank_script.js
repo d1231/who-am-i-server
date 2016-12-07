@@ -1,5 +1,12 @@
 "use strict";
 
+
+/**
+ * 
+ * Basic ranking script
+ * 
+ */
+
 var Rx = require('rx');
 var db = require('./../../../db/db');
 

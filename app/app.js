@@ -9,6 +9,9 @@ var routes = require('./routes/index');
 
 var players = require('./routes/players');
 
+require('dotenv').config()
+
+
 var app = express();
 app.set('views', path.join(__dirname, 'views'));
 

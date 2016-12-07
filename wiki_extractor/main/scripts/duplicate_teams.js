@@ -1,5 +1,11 @@
 'use strict';
 
+/**
+ * 
+ * Script to remove duplicates teams
+ * 
+ */
+
 let Team = require('../../../db/models/team');
 
 let mergedTeams = new Set();

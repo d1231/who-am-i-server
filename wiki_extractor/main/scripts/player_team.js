@@ -1,5 +1,11 @@
 'use strict';
 
+/**
+ * 
+ * Script to append teams id and nations to each player
+ * 
+ */
+
 const db = require('../../../db/db');
 
 let fetcher = require('../fetcher.js');
@@ -14,13 +20,13 @@ let i = 1;
 
 Rx.Observable.fromPromise(db.init("mongodb://localhost/projectt-v2")
         .then(() => {
-            return Player.find({}).limit(100);
+            return Player.find({}).batchSize(250);
         }))
-    .flatMap(function (players) {
+    .concatMap(function (players) {
 
         return Rx.Observable.from(players);
     })
-    .flatMap(function (player) {
+    .concatMap(function (player) {
 
         return updatePlayer(player);
 
@@ -41,13 +47,15 @@ function updatePlayer(player) {
     let playersNations = new Set(playerNationsArr);
 
     return Rx.Observable.onErrorResumeNext(Rx.Observable.from(teamsArr)
-            .flatMap(function (team) {
+            .concatMap(function (team) {
 
                 return updatePlayerFromTeam(team, player, playersNations);
 
             }), Rx.Observable.just())
         .last()
         .flatMap(function () {
+
+
             player.nations = Array.from(playersNations);
             return Rx.Observable.fromPromise(player.save())
                 .flatMap(function () {
@@ -65,16 +73,18 @@ function updatePlayerFromTeam(team, player, playersNations) {
     return Rx.Observable.fromPromise(Team.find({
             names: team.identifier
         }).lean())
-        .flatMap(function (teamsDb) {
+        .concatMap(function (teamsDb) {
 
             if (teamsDb.length !== 1) {
-                throw new Error(`Found only ${teamsDb.length} for ${team}`);
+                console.error(`Found only ${teamsDb.length} for ${team}`);
+                return Rx.Observable.just();
             }
 
             let teamDb = teamsDb[0];
 
             if (teamsDb.nation === "Unknown") {
-                throw new Error(`No nation for ${team}`)
+                console.error(`No nation for ${team}`);
+                return Rx.Observable.just();
             }
 
             team.id = teamDb._id;

@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * 
+ * Script to get all teams from players
+ * 
+ */
 
 const winston = require('winston');
 const db = require('../../../db/db');

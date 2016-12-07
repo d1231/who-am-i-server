@@ -1,6 +1,12 @@
 'use strict';
 
 
+/**
+ * 
+ * Script to set for each team a nation
+ * 
+ */
+
 let nations = new Set(["Italy", "England", "France", "Spain", "Israel", "Switzerland", "Netherlands", "Croatia", "Germany", "Portugal", "Austria", "Ukraine", "Russia",
     "Slovakia", "Slovenia", "Cyprus", "Finland", "Belarus", "USA", "Canada", "Mexico", "Chile", "Colombia", "Paraguay", "Uruguay", "Serbia", "Wales", "Ireland",
     "Norway", "Sweden", "Denmark", "Brazil", "Argentina", "Bosnia and Herzogovina", "Scotland", "Iran", "Iraq", "New Zealand", "Australia", "Romania", "Hungary",
