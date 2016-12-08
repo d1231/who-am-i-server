@@ -20,7 +20,9 @@ let i = 1;
 
 Rx.Observable.fromPromise(db.init("mongodb://localhost/projectt-v2")
         .then(() => {
-            return Player.find({}).batchSize(250);
+            return Player.find({}).sort({
+                name: 1
+            }).skip(0).batchSize(1000);
         }))
     .concatMap(function (players) {
 
@@ -70,20 +72,49 @@ function updatePlayer(player) {
 
 function updatePlayerFromTeam(team, player, playersNations) {
 
-    return Rx.Observable.fromPromise(Team.find({
-            names: team.identifier
-        }).lean())
-        .concatMap(function (teamsDb) {
+    // cleanTeamName(team);
 
-            if (teamsDb.length !== 1) {
-                console.error(`Found only ${teamsDb.length} for ${team}`);
-                return Rx.Observable.just();
+    return Rx.Observable.zip(
+            Rx.Observable.fromPromise(Team.find({
+                names: team.identifier
+            }).lean()),
+            Rx.Observable.fromPromise(Team.find({
+                names: team.text
+            }).lean()))
+        .concatMap(function (result) {
+
+            let teamsDb;
+            if (result[0].length == 0) {
+                teamsDb = result[1];
+            } else {
+                teamsDb = result[0];
             }
 
-            let teamDb = teamsDb[0];
 
-            if (teamsDb.nation === "Unknown") {
-                console.error(`No nation for ${team}`);
+            let teamDb;
+            if (teamsDb.length !== 1) {
+                console.error(`Found ${teamsDb.length} for ${team}, player id=${player._id}`);
+
+                let gT = null;
+                for (let t of teamsDb) {
+                    if (gT && t.nation !== gT) {
+                        gT = null;
+                        break;
+                    }
+                    gT = t.nation;
+                }
+
+                if (gT) {
+                    playersNations.add(gT);
+                }
+
+                return Rx.Observable.just();
+            } else {
+                teamDb = teamsDb[0];
+            }
+
+            if (teamDb.nation === "Unknown") {
+                console.error(`No nation for ${team}, player id=${player._id}`);
                 return Rx.Observable.just();
             }
 
@@ -93,4 +124,13 @@ function updatePlayerFromTeam(team, player, playersNations) {
             return Rx.Observable.just();
         });
 
+}
+
+function cleanTeamName(team) {
+
+    let cleanIdentifier = team.identifier.replace(/\\'/, "'")
+    team.identifier = cleanIdentifier;
+
+    let cleanName = team.name.replace(/\\'/, "'");
+    team.name = cleanName;
 }
