@@ -31,6 +31,11 @@ var teamSchema = new Schema({
 		type: String,
 		index: true,
 		required: true
+	},
+
+	league: {
+		type: String,
+		index: true
 	}
 });
 
