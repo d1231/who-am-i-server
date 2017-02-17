@@ -2,39 +2,61 @@
 
 const DEFAULT_SAMPLE = 5;
 
-var express = require('express');
+const ALL_NATIONS = ["ALL"];
 
-var validate = require("validate.js");
+var express = require('express');
 
 var router = express.Router();
 
-var player_repo = require('../../db/repository/player_repository');
+var playerRepo = require('../../db/repository/player_repository');
 
-router.get('/random_sample', function (req, res, next) {
+var config = require('../config/config');
 
-	let size = Number(req.query.size) || DEFAULT_SAMPLE;
+let availableNations = config.availableNations;
 
-	player_repo.randomSample(size).then(function (randomPlayer) {
-		res.json(randomPlayer);
-	}).catch(function (err) {
 
-		res.status(500).json(err);
+router.post('/sample', function(req, res, next) {
 
-	});
+    let size = DEFAULT_SAMPLE;
+
+    let nations = req.body.nation || [];
+
+    if (!validateNations(nations)) {
+        res.status(400).json({
+            error: {
+                status: 400,
+                message: "Unsupported Nation"
+            }
+        });
+        return;
+    }
+
+    playerRepo.randomSample({
+        nations: nations,
+        size: size
+    }).then(function(randomPlayers) {
+
+        res.json(randomPlayers);
+
+    }).catch(function(err) {
+
+        res.status(500).json(err);
+
+    });
 
 });
 
-router.get('/player/:id', function (req, res, next) {
+router.get('/player/:id', function(req, res, next) {
 
-	let id = req.params.id;
+    let id = req.params.id;
 
-	player_repo.getById(id).then(function (randomPlayer) {
-		res.json(randomPlayer);
-	}).catch(function (err) {
+    playerRepo.getById(id).then(function(randomPlayer) {
+        res.json(randomPlayer);
+    }).catch(function(err) {
 
-		res.status(500).json(err);
+        res.status(500).json(err);
 
-	});
+    });
 
 });
 
