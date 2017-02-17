@@ -18,7 +18,7 @@ let Rx = require('rx');
 
 let i = 1;
 
-Rx.Observable.fromPromise(db.init("mongodb://localhost/projectt-v2")
+Rx.Observable.fromPromise(db.init("mongodb://localhost/whomi")
         .then(() => {
             return Player.find({}).sort({
                 name: 1

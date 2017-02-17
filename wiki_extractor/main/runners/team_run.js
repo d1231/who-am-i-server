@@ -68,7 +68,7 @@ function initCrawler() {
 
 function runCrawler() {
 
-	db.init("mongodb://localhost/projectt-v2")
+	db.init("mongodb://localhost/whomi")
 		.then(function () {
 
 			winston.info("Successfully connected");

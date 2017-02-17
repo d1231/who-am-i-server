@@ -17,7 +17,7 @@ let prompt = require('prompt-promise');
 
 const db = require('../../../db/db');
 
-db.init("mongodb://localhost/projectt-v2")
+db.init("mongodb://localhost/whomi")
     .then(() => Team.find({}))
     .then(function (teams) {
         start(teams);

@@ -10,7 +10,7 @@ const winston = require('winston');
 const db = require('../../../db/db');
 const Player = require('../../../db/models/player');
 
-db.init("mongodb://localhost/projectt-v2").then(function () {
+db.init("mongodb://localhost/whomi").then(function () {
 
 	  winston.info("Successfully connected");
 

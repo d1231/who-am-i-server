@@ -1,89 +1,89 @@
 "use strict";
 
+
 /**
  * 
- * Script to get all teams from players
+ * Basic ranking script
  * 
  */
 
-const winston = require('winston');
-const db = require('../../../db/db');
-const Player = require('../../../db/models/player');
+var Rx = require('rx');
+var db = require('./../../../db/db');
 
-let globalMap_text = new Map();
-let globalMap_identifier = new Map();
+var Team = require('./../../../db/models/team');
 
-let l = new Set();
+var Player = require('./../../../db/models/player');
 
-function disconnect() {
-	db.disconnect();
-	winston.info("Successfully disconnected");
-}
+var PlayerRank = require('./../../../db/models/player_rank');
 
-function updateCount(map, key) {
-	let cnt = (map.get(key) || 0) + 1;
-	map.set(key, cnt);
-}
+var teamRank = require('./team_ranker.1');
 
-db.init("mongodb://localhost/projectt-v2").then(function () {
+db.init("mongodb://localhost/whomi").then(function() {
 
-	  winston.info("Successfully connected");
+    console.log("LL");
 
+    Player.find({}).limit(1).then(function(players) {
 
-	  return Player.find({}).lean();
+        console.log("FFF")
 
+        console.log(players);
 
-  })
-  .then(function (players) {
+        players.forEach(function(player) {
 
-	  for (let player of players) {
+            if (player.teams.length === 0) {
+                return;
+            }
 
-		  for (let team of player.teams) {
+            console.log(player);
 
-			  team = team.team;
+            Rx.Observable.from(player.teams)
+                .flatMap(function(team) {
 
-			  if (team.identifier === "") {
-				  l.add(team.text);
-			  }
+                    cosnole.log("FFF")
 
-			  updateCount(globalMap_text, team.text);
-			  updateCount(globalMap_identifier, team.identifier);
+                    return Rx.Observable.fromPromise(Team.findOne({
+                        names: team.team
+                    }).then(function(team2) {
 
-		  }
+                        return Promise.resolve({
+                            playerTeam: team,
+                            dbTeam: team2
+                        });
 
-	  }
+                    }));
 
-	  console.log(l);
+                })
+                .map(function(teams) {
 
-  })
-  .then(function () {
+                    console.log(teams.playerTeam);
 
-	  let teams = globalMap_identifier.keys();
+                    let rank = teamRank[teams.dbTeam.id] || 0.1;
 
-	  teams = Array.from(teams).sort(function (a, b) {
+                    return basicRank;
 
-		  return -(globalMap_identifier.get(a) - globalMap_identifier.get(b));
+                }).reduce(function(acc, val) {
 
-	  });
+                    acc = acc || 0;
+                    return acc + val;
 
-	  teams = teams.map(function (team) {
+                })
+                .subscribe(function(t) {
 
-		  var obj = {};
+                    //   new PlayerRank({
+                    // 	  rank: t,
+                    // 	  id: player.id
+                    //   }).save();
+                });
 
-		  obj[team] = globalMap_identifier.get(team);
+        });
 
-		  return obj;
+    });
 
-	  });
+}).catch(function(err) {
 
-	  //console.log(teams);
+    console.error(err);
 
-  })
-  .then(function () {
-
-	  disconnect();
-
-  })
+})})
   .catch(function (err) {
 
 	  winston.error(err);

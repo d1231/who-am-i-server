@@ -18,69 +18,148 @@ var PlayerRank = require('./../../../db/models/player_rank');
 
 var teamRank = require('./team_ranker.1');
 
-db.init("mongodb://localhost/projectt-v2").then(function () {
+console.log("START")
 
-	console.log("LL");
+db.init("mongodb://localhost/whomi").then(function() {
 
-	Player.find({}).limit(1).then(function (players) {
+    Player.find({ serve: { $exists: false }, "teams.team.text": { $in: ["Barcelona"] } })
+        .then(function(players) {
 
-		console.log("FFF")
+            console.log("STARTING PLAYERS")
 
-		console.log(players);
+            players.forEach(function(player) {
 
-		players.forEach(function (player) {
+                if (player.teams.length === 0) {
+                    return;
+                }
 
-			if (player.teams.length === 0) {
-				return;
-			}
+                Rx.Observable.from(player.teams)
+                    .flatMap(function(team) {
 
-			console.log(player);
+                        return Rx.Observable.fromPromise(Team.findOne({
+                                _id: team.team.id
+                            })
+                            .then(function(team2) {
 
-			Rx.Observable.from(player.teams)
-				.flatMap(function (team) {
+                                return {
+                                    playerTeam: team,
+                                    dbTeam: team2
+                                };
 
-					cosnole.log("FFF")
+                            }));
 
-					return Rx.Observable.fromPromise(Team.findOne({
-						names: team.team
-					}).then(function (team2) {
+                    })
+                    .map(function(teamData) {
 
-						return Promise.resolve({
-							playerTeam: team,
-							dbTeam: team2
-						});
+                        let rank = 0;
+                        if (teamData.dbTeam) {
 
-					}));
 
-				})
-				.map(function (teams) {
+                            rank = 0.05;
 
-					console.log(teams.playerTeam);
+                            let dbTeam = teamData.dbTeam;
 
-					let rank = teamRank[teams.dbTeam.id] || 0.1;
+                            for (let name of dbTeam.names) {
+                                if (teamRank[name]) {
+                                    rank = teamRank[name];
+                                }
+                            }
 
-					return basicRank;
+                        }
 
-				}).reduce(function (acc, val) {
+                        if (rank <= 0.1) {
+                            // console.log(`Missing ${teamData.playerTeam}`);
+                        }
 
-					acc = acc || 0;
-					return acc + val;
+                        teamData.rank = rank;
+                        return teamData;
 
-				})
-				.subscribe(function (t) {
+                    })
+                    .map(function(obj) {
 
-					//   new PlayerRank({
-					// 	  rank: t,
-					// 	  id: player.id
-					//   }).save();
-				});
 
-		});
+                        let teamEnd = (obj.playerTeam.end || 2018);
+                        let teamStart = obj.playerTeam.start || (teamEnd);
+                        let numberOfYearsInTeam = teamEnd - teamStart + 1;
 
-	});
+                        let finalTeamRank = (numberOfYearsInTeam * 15) * Math.pow(obj.rank, 3) +
+                            (obj.playerTeam.leagueStats.apps / (Math.max(numberOfYearsInTeam - 1, 1))) * Math.pow(obj.rank, 4);
 
-}).catch(function (err) {
+                        if (!obj.playerTeam.end || !obj.playerTeam.start) {
+                            finalTeamRank = finalTeamRank / 4;
+                        }
 
-	console.error(err);
+                        if (obj.playerTeam.leagueStats.apps <= 5) {
+                            if (obj.playerTeam.leagueStats.apps === 0) {
+                                finalTeamRank = finalTeamRank / 10;
+                            } else {
+                                finalTeamRank = finalTeamRank / 2.5;
+                            }
+                        }
+
+                        if (obj.rank >= 0.8 && obj.playerTeam.leagueStats.goals >= 10) {
+                            finalTeamRank *= 1000;
+                        }
+
+                        if (teamEnd <= 1995) {
+                            finalTeamRank = finalTeamRank / 2;
+                        }
+
+                        if (teamEnd <= 1980) {
+                            finalTeamRank = finalTeamRank / 500;
+                        }
+
+                        if (teamEnd > 2014) {
+                            finalTeamRank = finalTeamRank * 1.5;
+                        }
+
+
+
+                        return finalTeamRank;
+
+                    })
+                    .reduce(function(acc, val) {
+
+                        acc = acc || 0;
+                        return acc + val;
+
+                    })
+                    .subscribe(function(rank) {
+
+                        if (rank >= 50) {
+
+                            console.log(`Player: ${player.wikiId} Rank: ${rank} `);
+                            player.serve = true;
+                            player.save();
+
+                        } else {
+
+
+                            if (rank >= 25) {
+                                console.log(`Player: ${player.wikiId} Rank: ${rank} | NOT SERVED`);
+                            }
+                        }
+
+
+                    }, function(err) {
+
+                        console.log(err);
+
+                    });
+
+            });
+
+        }).catch(function(err) {
+
+
+            console.log(err)
+
+        })
+
+}).catch(function(err) {
+
+    console.error(err);
+
+    console.log("ERROR")
 
 })

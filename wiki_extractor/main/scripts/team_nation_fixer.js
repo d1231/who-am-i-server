@@ -36,7 +36,7 @@ var wikiParser = require('wtf_wikipedia');
 
 let Team = require('../../../db/models/team');
 
-db.init("mongodb://localhost/projectt-v2")
+db.init("mongodb://localhost/whomi")
     .then(
         () => Team.find({
             nation: "Unknown"
