@@ -10,7 +10,7 @@ function sample(params) {
 
     let size = params.size || config['DEFAULT_SIZE'];
     let nations = params.nations;
-    let endDate = params.endDate;
+    let endYear = params.endYear;
 
     let matchObject = { serve: true };
 
@@ -18,20 +18,22 @@ function sample(params) {
         matchObject.nations = { $in: nations };
     }
 
-    if (endDate) {
-        matchObject.endDate = { $gte: endDate };
+    if (endYear) {
+        matchObject.endYear = { $gte: endYear };
     }
 
     return Player.aggregate([{ $match: matchObject }, { $sample: { size: size } }, {
             $project: {
-                "__v": false,
-                serve: false,
-                dateOfBirth: false
+                "_id": 1,
+                "name": 1,
+                "position": 1,
+                "team": 1,
+                "nations": 1,
+                "startYear": 1,
+                "endYear": 1
             }
         }])
         .then(function(players) {
-
-            console.log(players);
 
             return players;
 

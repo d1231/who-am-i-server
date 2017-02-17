@@ -1,6 +1,6 @@
 {
     "name": "whomi",
-    "version": "1np.0.0",
+    "version": "1.0.0",
     "private": true,
     "scripts": {
         "start": "node app/bin/www",
@@ -8,13 +8,13 @@
         "test-unit": "mocha 'db/test/**/*.js'"
     },
     "dependencies": {
-        "body-parser": "~1.13.2",
-        "command-line-args": "^3.0.0",
+        "body-parser": "~1.16.1",
+        "command-line-args": "^4.0.1",
         "compression": "^1.6.2",
-        "cookie-parser": "~1.3.5",
-        "express": "~4.13.1",
-        "mongoose": "~4.6.4",
-        "morgan": "~1.6.1",
+        "cookie-parser": "~1.4.3",
+        "express": "~4.14.1",
+        "mongoose": "~4.8.3",
+        "morgan": "~1.8.1",
         "rx": "^4.1.0",
         "serve-favicon": "~2.3.0"
     },
@@ -22,6 +22,6 @@
         "eslint": "^3.10.2",
         "chai": "^3.5.0",
         "chai-http": "^3.0.0",
-        "mocha": "^2.5.3"
+        "mocha": "^3.2.0"
     }
 }

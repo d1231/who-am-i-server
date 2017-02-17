@@ -13,17 +13,17 @@ var db = require(__base + 'db/main');
 var config = require(__base + 'config/main')
 var playerRepo = require(__base + 'db/repository/playerRepository');
 
-describe("Player Repo", function() {
+describe("Player Repo", function () {
 
-    before(function(done) {
+    before(function (done) {
 
-        db.init(config["DB_PATH"]).then(function() {
+        db.init(config["DB_PATH"]).then(function () {
 
             console.log("Db is running");
 
             done();
 
-        }).catch(function(err) {
+        }).catch(function (err) {
 
             console.error(err);
 
@@ -31,62 +31,92 @@ describe("Player Repo", function() {
 
     });
 
-    it("findByWikiId", function(done) {
+    it("findByWikiId", function (done) {
 
 
-        playerRepo.getById("Kamil Zayatte").then(function(res) {
+        playerRepo.getById("Phil Neville").then(function (res) {
 
-            res.wikiId.should.equal("Kamil Zayatte");
+            res.wikiId.should.equal("Phil Neville");
 
             done();
 
-        }).catch(function(err) {
+        }).catch(function (err) {
 
             console.error(err);
 
-            expect(true).to.equal(false);
+            done(new Error("Failure"));
 
         });
 
     });
 
-    describe("Player sample", function() {
+    describe("Player sample", function () {
 
-        it("Simple sample", function(done) {
+        it("Simple sample", function (done) {
 
 
             playerRepo.sample({
                 size: 5
-            }).then(function(res) {
+            }).then(function (res) {
 
                 res.should.have.length(5);
 
                 done();
 
-            }).catch(function(err) {
+            }).catch(function (err) {
 
                 console.error(err);
 
+                done(err);
             })
 
         });
 
-        it("Nation sample", function(done) {
+        it("Nation sample", function (done) {
 
 
             playerRepo.sample({
                     nations: ["Israel"]
                 })
-                .then(function(res) {
+                .then(function (res) {
 
-                    expect(res.map((v) => v.nations)).all.to.include.members(["Israel"]);
+                    res.forEach(function (element) {
+                        expect(element.nations).to.include("Israel");
+                    }, this);
 
                     done();
 
                 })
-                .catch(function(err) {
+                .catch(function (err) {
 
                     console.error(err);
+
+                    done(err);
+
+                })
+
+        });
+
+        it("End year sample", function (done) {
+
+
+            playerRepo.sample({
+                    endYear: 2006
+                })
+                .then(function (res) {
+
+                    res.forEach(function(element) {
+                        expect(element.endYear).to.be.least(2006);
+                    }, this);
+
+                    done();
+
+                })
+                .catch(function (err) {
+
+                    console.error(err);
+
+                    done(err);
 
                 })
 
