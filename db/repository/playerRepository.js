@@ -2,27 +2,46 @@
 
 var __base = "../../";
 
-var config = require(__base + 'config/main');
 var Player = require(__base + "db/models/player");
 var PlayerRank = require(__base + "db/models/player_rank");
 
 function sample(params) {
 
-    let size = params.size || config['DEFAULT_SIZE'];
+    let size = params.size || 5;
     let nations = params.nations;
     let endYear = params.endYear;
+    let project = params.project || true;
 
-    let matchObject = { serve: true };
+    let matchObject = {
+        serve: true
+    };
 
     if (nations && nations.length > 0) {
-        matchObject.nations = { $in: nations };
+        matchObject.nations = {
+            $in: nations
+        };
     }
 
     if (endYear) {
-        matchObject.endYear = { $gte: endYear };
+        matchObject.endYear = {
+            $gte: endYear
+        };
     }
 
-    return Player.aggregate([{ $match: matchObject }, { $sample: { size: size } }, {
+    let pipeline = [];
+
+    pipeline.push({
+        $match: matchObject
+    });
+    pipeline.push({
+        $sample: {
+            size: size
+        }
+    });
+
+
+    if (project) {
+        pipeline.push({
             $project: {
                 "_id": 1,
                 "name": 1,
@@ -32,8 +51,11 @@ function sample(params) {
                 "startYear": 1,
                 "endYear": 1
             }
-        }])
-        .then(function(players) {
+        });
+    }
+
+    return Player.aggregate(pipeline)
+        .then(function (players) {
 
             return players;
 
@@ -45,7 +67,7 @@ function savePlayer(player) {
 
     var teams = [];
 
-    player.teams.forEach(function(team) {
+    player.teams.forEach(function (team) {
 
         let teamModel = {};
 
@@ -84,7 +106,9 @@ function savePlayer(player) {
 
 function getById(wikiId) {
 
-    return Player.findOne({ "wikiId": wikiId }).lean();
+    return Player.findOne({
+        "wikiId": wikiId
+    }).lean();
 
 }
 

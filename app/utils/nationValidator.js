@@ -1,26 +1,32 @@
-let availableNations = config.availableNations;
+'use strict';
+
+let __base = "../../";
+
+let logger = (__base + "app/logger");
+
+let config = require(__base + 'config');
+
+let availableNations = config['AVAILABLE_NATIONS'];
 
 
-module.exports = function(value) {
+module.exports = function (value) {
 
-    return new Promise(function(resolve, reject) {
+    let arr;
 
-        let nationsToCheck;
+    if (Object.prototype.toString.call(value) !== '[object Array]') {
+        arr =[];
+        arr.push(value);
+    } else {
+        arr = value;
+    }
 
-        if (typeof value !== "Array") {
-            nationsToCheck = [value];
+    for (let i = 0; i < arr.length; i++) {
+        if (!availableNations.has(arr[i])) {
+            return false;
         }
 
-        for (let nation of nationsToCheck) {
+    }
 
-            if (!availableNations.has(nation)) {
-                reject(`Unsupported nation ${nation}`);
-            }
+    return true;
 
-        }
-
-        resolve(nationsToCheck);
-
-    })
-
-}
+};

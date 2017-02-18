@@ -9,8 +9,8 @@ chai.use(chaiHttp);
 var should = chai.should();
 var expect = chai.expect;
 
-var db = require(__base + 'db/main');
-var config = require(__base + 'config/main')
+var db = require(__base + 'db');
+var config = require(__base + 'config/')
 var playerRepo = require(__base + 'db/repository/playerRepository');
 
 describe("Player Repo", function () {
@@ -105,7 +105,7 @@ describe("Player Repo", function () {
                 })
                 .then(function (res) {
 
-                    res.forEach(function(element) {
+                    res.forEach(function (element) {
                         expect(element.endYear).to.be.least(2006);
                     }, this);
 

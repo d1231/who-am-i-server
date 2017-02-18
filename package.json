@@ -1,27 +1,29 @@
 {
-    "name": "whomi",
-    "version": "1.0.0",
-    "private": true,
-    "scripts": {
-        "start": "node app/bin/www",
-        "test": "npm run test-unit",
-        "test-unit": "mocha 'db/test/**/*.js'"
-    },
-    "dependencies": {
-        "body-parser": "~1.16.1",
-        "command-line-args": "^4.0.1",
-        "compression": "^1.6.2",
-        "cookie-parser": "~1.4.3",
-        "express": "~4.14.1",
-        "mongoose": "~4.8.3",
-        "morgan": "~1.8.1",
-        "rx": "^4.1.0",
-        "serve-favicon": "~2.3.0"
-    },
-    "devDependencies": {
-        "eslint": "^3.10.2",
-        "chai": "^3.5.0",
-        "chai-http": "^3.0.0",
-        "mocha": "^3.2.0"
-    }
+  "name": "whomi",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Danny",
+  "scripts": {
+    "start": "node app/bin/www",
+    "test": "mocha"
+  },
+  "dependencies": {
+    "body-parser": "~1.16.1",
+    "command-line-args": "^4.0.1",
+    "compression": "^1.6.2",
+    "cookie-parser": "~1.4.3",
+    "errorhandler": "^1.5.0",
+    "express": "~4.14.1",
+    "mongoose": "~4.8.3",
+    "morgan": "~1.8.1",
+    "rx": "^4.1.0",
+    "serve-favicon": "~2.3.0",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^3.10.2",
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.2.0"
+  }
 }

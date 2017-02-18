@@ -1,25 +1,23 @@
 "use strict";
 
-const DEFAULT_SAMPLE = 5;
-
-const ALL_NATIONS = ["ALL"];
+const __base = '../../';
 
 var express = require('express');
 
 var router = express.Router();
 
-var playerRepo = require('../../db/repository/player_repository');
-
-var config = require('../config/config');
-
-let availableNations = config.availableNations;
-
+var playerRepo = require(__base + 'db/repository/playerRepository');
+var config = require(__base + 'config');
+var validateNations = require(__base + 'app/utils/nationValidator');
 
 router.post('/sample', function(req, res, next) {
 
-    let size = DEFAULT_SAMPLE;
+    let size = config['DEFAULT_SIZE'];
 
-    let nations = req.body.nation || [];
+    let body = req.body || {};
+    let nations = body.nations || [];
+    console.log(nations);
+    let endYear = body.endYear || 2000;
 
     if (!validateNations(nations)) {
         res.status(400).json({
@@ -31,8 +29,9 @@ router.post('/sample', function(req, res, next) {
         return;
     }
 
-    playerRepo.randomSample({
+    playerRepo.sample({
         nations: nations,
+        endYear: endYear,
         size: size
     }).then(function(randomPlayers) {
 

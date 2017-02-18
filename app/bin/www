@@ -1,16 +1,22 @@
 #!/usr/bin/env node
 
+const __base = '../../';
+
+const config = require(__base + 'config');
+
 var app = require('../app');
-var debug = require('debug')('project-t:server');
+var debug = require('debug')('whomi:server');
 var http = require('http');
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(config["PORT"]);
 app.set('port', port);
 
 var server;
 
-require('../../db/db')
-	.init(process.env.DATABASE || "mongodb://localhost/projectt")
+console.log(config);
+
+require(__base + 'db')
+	.init(config["DB_PATH"])
 	.then(function () {
 
 		server = http.createServer(app);
